@@ -1,0 +1,67 @@
+{
+  "name": "docflow-ai",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "prisma generate && next build",
+    "start": "next start -H 0.0.0.0",
+    "worker": "tsx src/worker.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "storage:init": "tsx scripts/storage-init.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3",
+    "@aws-sdk/s3-request-presigner": "^3",
+    "@google/genai": "^2",
+    "@prisma/adapter-pg": "^7",
+    "@prisma/client": "^7",
+    "better-auth": "^1.7",
+    "bullmq": "^5",
+    "decimal.js": "^10",
+    "dotenv": "^17",
+    "exceljs": "^4",
+    "ioredis": "^5",
+    "lucide-react": "^1",
+    "next": "^16.4",
+    "pg": "^8",
+    "react": "^19",
+    "react-dom": "^19",
+    "recharts": "^3",
+    "stripe": "^22",
+    "tsx": "^4",
+    "zod": "^4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1",
+    "@types/node": "^24",
+    "@types/pg": "^8",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "^16.4",
+    "prettier": "^3",
+    "prisma": "^7",
+    "typescript": "^5.9",
+    "vitest": "^4"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    },
+    "@prisma/config": {
+      "effect": "3.22.5"
+    }
+  }
+}

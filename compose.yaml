@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: docflow
+      POSTGRES_USER: docflow
+      POSTGRES_PASSWORD: docflow_local
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docflow"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+  valkey:
+    image: valkey/valkey:8-alpine
+    command:
+      [
+        "valkey-server",
+        "--maxmemory-policy",
+        "noeviction",
+        "--appendonly",
+        "yes",
+      ]
+    ports:
+      - "127.0.0.1:6380:6379"
+    volumes:
+      - valkey:/data
+  storage:
+    image: rustfs/rustfs@sha256:ee717072290bec9b11abfc0365f8310b00df1cd9b3639943edae47bdef05044a
+    environment:
+      RUSTFS_ACCESS_KEY: docflow-local
+      RUSTFS_SECRET_KEY: docflow-local-object-storage
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - storage:/data
+volumes:
+  postgres:
+  valkey:
+  storage:

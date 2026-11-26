@@ -1,0 +1,1 @@
+ALTER TABLE "Document" ADD COLUMN "mock" BOOLEAN NOT NULL DEFAULT false;

@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  QUEUED
+  PROCESSING
+  NEEDS_REVIEW
+  COMPLETED
+  FAILED
+  CANCELED
+  REJECTED
+  DELETING
+}
+
+model User {
+  id String @id
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  accounts Account[]
+  memberships Membership[]
+  @@map("user")
+}
+
+model Session {
+  id String @id
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id String @id
+  accountId String
+  providerId String
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@unique([providerId,accountId])
+  @@map("account")
+}
+
+model Verification {
+  id String @id
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Workspace {
+  id String @id @default(cuid())
+  name String
+  business String
+  locale String
+  currency String
+  createdAt DateTime @default(now())
+  members Membership[]
+  documents Document[]
+  events AuditEvent[]
+  metrics Usage[]
+  aiCalls AiUsage[]
+  invitations Invitation[]
+  subscription Subscription?
+  reports Report[]
+}
+
+model Membership {
+  workspaceId String
+  userId String
+  role WorkspaceRole
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@id([workspaceId,userId])
+  @@index([userId])
+}
+
+model Invitation {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  email String
+  tokenHash String @unique
+  role WorkspaceRole
+  expiresAt DateTime
+  acceptedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([workspaceId,email])
+}
+
+model Document {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  filename String
+  mime String
+  bytes Int
+  hash String
+  storageKey String @unique
+  status DocumentStatus @default(UPLOADED)
+  attempt Int @default(1)
+  leaseId String?
+  leaseUntil DateTime?
+  error String?
+  mock Boolean @default(false)
+  extracted Json?
+  edited Json?
+  approved Json?
+  findings Json?
+  kind String?
+  vendor String?
+  vendorKey String?
+  reference String?
+  currency String?
+  total Decimal? @db.Decimal(24,6)
+  issuedOn DateTime? @db.Date
+  version Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  revisions DocumentRevision[]
+  @@unique([workspaceId,hash])
+  @@index([workspaceId,createdAt])
+  @@index([workspaceId,status,createdAt])
+  @@index([workspaceId,vendorKey,reference])
+  @@index([workspaceId,issuedOn,currency])
+  @@index([status,leaseUntil])
+}
+
+model DocumentRevision {
+  id String @id @default(cuid())
+  documentId String
+  document Document @relation(fields:[documentId],references:[id],onDelete:Cascade)
+  actorId String?
+  action String
+  value Json?
+  createdAt DateTime @default(now())
+  @@index([documentId,createdAt])
+}
+
+model AuditEvent {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  actorId String?
+  action String
+  targetId String?
+  createdAt DateTime @default(now())
+  @@index([workspaceId,createdAt])
+}
+
+model Usage {
+  workspaceId String
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  period String
+  uploads Int @default(0)
+  retries Int @default(0)
+  insightRequests Int @default(0)
+  @@id([workspaceId,period])
+}
+
+model AiUsage {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  service String
+  model String
+  inputTokens Int
+  outputTokens Int
+  estimatedUsd Decimal? @db.Decimal(16,8)
+  createdAt DateTime @default(now())
+  @@index([workspaceId,createdAt])
+}
+
+model Subscription {
+  workspaceId String @id
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  customerId String @unique
+  subscriptionId String? @unique
+  status String @default("free")
+  plan String @default("starter")
+  lastEventAt Int @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model BillingEvent {
+  id String @id
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  name String
+  from DateTime
+  to DateTime
+  createdAt DateTime @default(now())
+  @@index([workspaceId,createdAt])
+}
