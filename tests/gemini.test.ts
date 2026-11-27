@@ -69,6 +69,10 @@ describe("Gemini purpose isolation", () => {
         ],
       }),
     );
+    const wireSchema = JSON.stringify(
+      mocks.generate.mock.calls[0][0].config.responseJsonSchema,
+    );
+    expect(wireSchema).not.toMatch(/"(\$schema|pattern|maxItems)":/);
     expect(mocks.usage).toHaveBeenCalledWith({
       data: expect.objectContaining({
         service: "EXTRACTION",
@@ -127,5 +131,32 @@ describe("Gemini purpose isolation", () => {
       ),
     ).rejects.toThrow("credentials are missing");
     expect(mocks.construct).toHaveBeenCalledTimes(1);
+  });
+  it("logs an allowlisted provider reason without logging raw errors", async () => {
+    vi.stubEnv("GEMINI_EXTRACTION_API_KEY", "fixture-extraction");
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      mocks.generate.mockRejectedValueOnce(
+        Object.assign(
+          new Error("Your API key was reported as leaked: secret fixture"),
+          {
+            status: 403,
+          },
+        ),
+      );
+      await expect(
+        extract("workspace", "application/pdf", invoicePdf()),
+      ).rejects.toThrow("could not complete");
+      expect(log).toHaveBeenCalledExactlyOnceWith(
+        JSON.stringify({
+          event: "gemini_request_failed",
+          purpose: "EXTRACTION",
+          status: 403,
+          reason: "API_KEY_REPORTED_LEAKED",
+        }),
+      );
+    } finally {
+      log.mockRestore();
+    }
   });
 });

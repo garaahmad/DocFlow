@@ -782,6 +782,63 @@ small {
   height: 41px;
   border-radius: 10px;
 }
+.sample-review {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(1.25rem, 4vw, 3rem);
+  margin-top: 1.25rem;
+  padding: clamp(1.15rem, 4vw, 2.5rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--tint);
+}
+.sample-review h3 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.2;
+}
+.sample-review p {
+  max-width: 35rem;
+  color: var(--muted);
+  margin: 0.65rem 0 1rem;
+}
+.sample-review-invoice {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.sample-review-reference,
+.sample-review-invoice dl > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+}
+.sample-review-reference span,
+.sample-review-invoice dt {
+  color: var(--muted);
+}
+.sample-review-invoice dl {
+  margin: 0.75rem 0 0;
+}
+.sample-review-invoice dl > div {
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--line);
+}
+.sample-review-invoice dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sample-review-mismatch {
+  color: var(--amber);
+}
+@media (max-width: 640px) {
+  .sample-review {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .use-cases {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

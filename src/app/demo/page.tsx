@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description:
     "Explore a sample workspace and approve a corrected invoice without an account.",
 };
-export default async function Demo() {
-  return <DemoWorkspace locale={await language()} />;
+export default async function Demo({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string | string[] }>;
+}) {
+  const [locale, { view }] = await Promise.all([language(), searchParams]);
+  return <DemoWorkspace locale={locale} startInReview={view === "review"} />;
 }

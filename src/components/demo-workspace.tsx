@@ -19,13 +19,23 @@ import { Brand } from "./brand";
 import { Preferences } from "./preferences";
 import { Metrics, Status } from "./app-shared";
 import { TrendChart } from "./charts";
-import { demoDocs, sampleActivity } from "@/lib/demo";
+import {
+  demoDocs,
+  sampleActivity,
+  sampleInvoiceExtractedTotal,
+} from "@/lib/demo";
 
 type Tab = "overview" | "documents" | "analytics" | "review";
-export function DemoWorkspace({ locale }: { locale: string }) {
+export function DemoWorkspace({
+  locale,
+  startInReview,
+}: {
+  locale: string;
+  startInReview: boolean;
+}) {
   const ar = locale === "ar";
   const t = (en: string, a: string) => (ar ? a : en);
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(startInReview ? "review" : "overview");
   const [selected, setSelected] = useState(0);
   const [approved, setApproved] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -360,7 +370,7 @@ export function DemoWorkspace({ locale }: { locale: string }) {
                           selected === 0
                             ? approved || checked
                               ? total
-                              : "1404.00"
+                              : sampleInvoiceExtractedTotal
                             : doc.total.replace(/[^0-9.]/g, "")
                         }
                         readOnly={!checked || approved || selected !== 0}

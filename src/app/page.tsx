@@ -25,6 +25,7 @@ import { Preferences } from "@/components/preferences";
 import { ProductPreview } from "@/components/product-preview";
 import { language } from "@/lib/language";
 import { PricingCards } from "@/components/pricing-cards";
+import { demoDocs, sampleInvoiceExtractedTotal } from "@/lib/demo";
 
 const features = [
   {
@@ -144,6 +145,11 @@ export default async function Home() {
   const locale = await language();
   const ar = locale === "ar";
   const t = (en: string, arabic: string) => (ar ? arabic : en);
+  const sampleInvoice = demoDocs[0];
+  const extractedTotal = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(Number(sampleInvoiceExtractedTotal));
   const nav = [
     ["#product", t("Product", "المنتج")],
     ["#features", t("Features", "المزايا")],
@@ -290,6 +296,39 @@ export default async function Home() {
               </article>
             ))}
           </div>
+          <article className="sample-review">
+            <div className="sample-review-copy">
+              <h3>{t("Review a sample invoice", "راجع فاتورة نموذجية")}</h3>
+              <p>
+                {t(
+                  "Compare the extracted total with the original, correct the amount, and approve the record. The demo opens directly to the invoice.",
+                  "قارن الإجمالي المستخرج بالأصل وصحّح المبلغ ثم اعتمد السجل. يفتح العرض على الفاتورة مباشرة.",
+                )}
+              </p>
+              <Link href="/demo?view=review" className="button primary">
+                <ReceiptText size={17} aria-hidden="true" />
+                {t("Open the sample review", "افتح مراجعة العينة")}
+              </Link>
+            </div>
+            <div className="sample-review-invoice">
+              <div className="sample-review-reference">
+                <strong>{sampleInvoice.name}</strong>
+                <span dir="ltr">{sampleInvoice.ref}</span>
+              </div>
+              <dl>
+                <div>
+                  <dt>{t("Extracted total", "الإجمالي المستخرج")}</dt>
+                  <dd className="sample-review-mismatch" dir="ltr">
+                    {extractedTotal}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t("Original total", "الإجمالي الأصلي")}</dt>
+                  <dd dir="ltr">{sampleInvoice.total}</dd>
+                </div>
+              </dl>
+            </div>
+          </article>
         </section>
         <section className="site-section tinted" id="features">
           <div className="wrap">

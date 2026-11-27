@@ -48,6 +48,9 @@ export const demoDocs = [
     category: "Research",
   },
 ] as const;
+
+export const sampleInvoiceExtractedTotal = "1404.00";
+
 export const sampleActivity = [
   { month: "Jun", uploaded: 20, processed: 16, exceptions: 3, spend: 680 },
   { month: "Jul", uploaded: 37, processed: 31, exceptions: 4, spend: 1200 },
